@@ -32,6 +32,30 @@ bool is_palin(std::string&s)
 	return (s==s2);
 }
 
+inline std::string add_one(std::string& a)
+{
+    std::string res;// res.reserve(1024);
+    prepend_zeros(a,b);
+    DLOGF("ENTER: a=%s b=%s\n",a.c_str(),b.c_str());
+
+    int rest=0;
+    int i=0;
+    DLOG("Counting sum \n");
+    for (i=a.size()-1;i>=0;--i) {
+        int c=a[i]&0xf;
+        int d=b[i]&0xf;
+        res+=(((c+d+rest)%10) + 0x30);
+        DLOGF("i=%d c=%d d=%d rest=%d sum=%d res=%s\n",i,c,d,rest,c+d+rest,res.c_str());
+        if (c+d+rest>9) rest=1;else rest=0;
+    }
+    if (rest)
+        res+='1';
+
+    reverse(res);
+    return res;
+}
+
+
 int main()
 {
     unsigned t=0;
