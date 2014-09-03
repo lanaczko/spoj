@@ -1,18 +1,15 @@
-all: arith onp palin prime1 test
+#PROBLEMS := arith onp palin prime1 test
+PROBLEMS := arith palin
+all: ${PROBLEMS}
 
 export CXXFLAGS=-ggdb
 
 export CC=g++
 
-arith:
+${PROBLEMS}:
 	cd $@ && $(MAKE)
 
-onp:
+clean:
+	cd arith && make clean
 
-palin:
-
-prime1:
-
-test:
-
-.PHONY: arith onp palin prime1 test
+.PHONY: ${PROBLEMS}
