@@ -1,10 +1,10 @@
+#define LOGIT 0
+
 #include <stdio.h>
 #include <string.h>
 #include <string>
 #include <list>
 #include <stdlib.h>
-
-#define LOGIT 0
 
 #define DLOG(str) if (LOGIT) printf("%s: %s\n", __FUNCTION__, str);
 #define DLOGF(fmt, ...) if (LOGIT) printf("%s: " fmt "\n", __FUNCTION__, __VA_ARGS__);
@@ -97,7 +97,6 @@ std::string mul(std::string a,std::string b)
     DLOGF("ENTER: a=%s b=%s\n",a.c_str(),b.c_str());
 
     int zeros_to_append=0;
-    print_intermid.clear();
     std::list<std::string> intermid;
     for (int j=b.size()-1;j>=0;--j) {
         int overload=0;
@@ -152,25 +151,74 @@ std::string count_it(std::string a, std::string b, count_fn f)
     return res;
 }
 
-void print_operands(std::string a, std::string b, char op, int offset=0)
+void print_result(std::string a,std::string b, std::string res, std::list<std::string>& ii, char op)
 {
+    int max_length=0;
+    if (!ii.empty()){
+        max_length=ii.back().size()+ii.size()-1;
+    }
+    else
+        max_length=0;
+
     b=std::string(1,op)+b;
     std::string*shorter,*longer;
     if(a.size()<b.size()) {shorter=&a;longer=&b; }else {shorter=&b;longer=&a;}
-
-    if (offset)
-        offset=offset-longer->size();
-    if (offset<0) offset=0;
-
-    std::string spaces(offset,' ');
-
-    int diff=abs(a.size()-b.size());
-    std::string spaces_diff(offset+diff,' ');
+    if (max_length<longer->size())
+        max_length=longer->size();
+    if (max_length<res.size())
+        max_length=res.size();
 
 
-    *longer=spaces+ *longer;
-    *shorter=spaces_diff+ *shorter;
-    printf("%s\n%s\n",a.c_str(),b.c_str());
+
+    printf("%s%s\n%s%s\n",std::string(max_length-a.size(),' ').c_str(),a.c_str(),std::string(max_length-b.size(),' ').c_str(),b.c_str());
+
+    std::string * second;
+    if (!ii.empty()) {
+        remove_prep_zeros(ii.front());
+        second=&ii.front();
+    }
+    else
+        second=&res;
+
+    std::string dashes;
+    if (b.size()>second->size()) {
+        dashes = std::string(b.size(),'-');
+    }
+    else {
+        dashes = std::string(second->size(),'-');
+    }
+    dashes=std::string(max_length-dashes.size(),' ')+dashes;
+    printf("%s\n",dashes.c_str());
+
+    if (!ii.empty()) {
+        int ident=max_length;
+        for (std::list<std::string>::iterator it=ii.begin(); it!=ii.end();++it) {
+            remove_prep_zeros(*it);
+            printf("%s%s\n",std::string(ident-it->size(),' ').c_str(),it->c_str());
+            ident--;
+        }
+        /* ----- */
+#if 0
+        if (res.size()>ii.back().size()) {
+            dashes = std::string(res.size(),'-');
+        }
+        else {
+            dashes = std::string(ii.back().size(),'-');
+        }
+#endif
+        int dash_size = max_length-ii.back().size();
+        if (res.size()==max_length)
+            dash_size=max_length;
+
+        DLOGF("max_length=%d dash_size=%d\n",max_length,dash_size);
+
+        dashes=std::string(dash_size,'-');
+        dashes=std::string(max_length-dashes.size(),' ')+dashes;
+        printf("%s\n",dashes.c_str());
+    }
+
+    printf("%s%s\n", std::string(max_length-res.size(),' ').c_str(),res.c_str());
+    printf("\n");
 }
 
 int main()
@@ -180,6 +228,7 @@ int main()
 
     scanf("%d",&t);
     for (int i=0;i<t;i++) {
+        print_intermid.clear();
         std::string a,b; a.reserve(1024); b.reserve(1024);
         char op;
 
@@ -189,39 +238,19 @@ int main()
         switch (op) {
             case '+': {
                 std::string res = count_it(a,b,add);
-                print_result(a,b,'+',res.size());
+                print_result(a,b,res,print_intermid,'+');
                 break;
                       }
             case '-': {
                 std::string res = count_it(a,b,sub);
-                print_operands(a,b,'-');
-                print_dashes_res(b,res);
+                print_result(a,b,res,print_intermid,'-');
                 break;
                       }
             case '*': {
                 std::string res=count_it(a,b,mul);
-                int longest;
-                if (print_intermid.size()>1) {
-                    longest=print_operands(a,b,'*',res.size());
-                    int ident=longest;
-
-                    for (std::list<std::string>::iterator it=print_intermid.begin();it!=print_intermid.end();++it) {
-                        remove_prep_zeros(*it);
-                        std::string spaces(ident-it->size(),' ');
-                        printf("%s%s\n",spaces.c_str(),it->c_str());
-                        ident--;
-                    }
-                    std::string dashes(longest,'-');
-                    printf("%s\n",dashes.c_str());
-                } else {
-                    longest=print_operands(a,b,'*');
-                }
-                if (longest>res.size()) {
-                    std::string spaces(longest-res.size(),' ');
-                    res=spaces+res;
-                }
-                printf("%s\n",res.c_str());
-                printf("\n");
+                if (print_intermid.size()<=1)
+                    print_intermid.clear();
+                print_result(a,b,res,print_intermid,'*');
                 break;
                       }
             default:
