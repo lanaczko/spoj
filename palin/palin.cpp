@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h>
+#include <math.h>
 
 #define MAX_EXPR_LEN 1000001
 
@@ -10,6 +11,7 @@ void reverse(std::string &str) {
 
 std::string add_one(std::string&a,int _d)
 {
+ //   printf("add %s + %d\n",a.c_str(),_d);
 	std::string res;
 	int rest=0;
 	for (int i=a.size()-1;i>=0;--i) {
@@ -26,9 +28,10 @@ std::string add_one(std::string&a,int _d)
 
 bool is_palin(std::string&s)
 {
-	std::string s2(s);
-	reverse(s2);
-	return (s==s2);
+    int e=s.size()-1;
+    for (int i=0;i<e/2+1;++i)
+        if (s[i]!=s[e-i]) return false;
+    return true;
 }
 
 int main()
@@ -41,14 +44,14 @@ int main()
         scanf("%s", expr);
 	std::string str(expr);
 
-	str=add_one(str,'1');
+	str=add_one(str,1);
 	while (!is_palin(str)) {
+        //printf("candidate= %s\n",str.c_str());
 	    int str_end=str.size()-1;
 	    for (int i=str_end;i>=str_end/2;--i) {
             if (str[i] != str[str_end-i])
-                str=add_one(str,abs(str[i]-str[str_end-i]));
+                str=add_one(str,abs(str[i]-str[str_end-i])*powl(10,str_end-i));
         }
-        //printf("candidate= %s\n",str.c_str());
 	}
 
 
