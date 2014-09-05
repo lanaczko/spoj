@@ -5,25 +5,31 @@
 
 #define MAX_EXPR_LEN 1000001
 
-void reverse(std::string &str) {
-    str = std::string(str.rbegin(), str.rend());
-}
+#define unlikely(x)     __builtin_expect((x),0)
 
-std::string add_one(std::string&a,int _d)
+void increment(std::string&str,int d)
 {
- //   printf("add %s + %d\n",a.c_str(),_d);
-	std::string res;
-	int rest=0;
-	for (int i=a.size()-1;i>=0;--i) {
-		int c=a[i]&0xf;
-		res+=(((c+_d+rest)%10) + 0x30);
-		if (c+_d+rest>9) rest=1;else rest=0;
-		_d=0;
-	}
-	if (rest) res+='1';
-
-	reverse(res);
-	return res;
+    //printf("increment %s %d\n",str.c_str(),d);
+    ++str[d];
+    if (unlikely(str[d]==':')) {
+     //   printf("Compilcated increment\n");
+        str[d]='0';
+        int rest=1;
+        for (int j=d-1;j>=0;--j) {
+      //      printf("Checking j=%d str[j]=%c\n",j,str[j]);
+            if (str[j]=='9')
+                str[j]='0';
+            else {
+                ++str[j]; rest=0;
+                break;
+            }
+        }
+        if (rest) str=std::string("1")+str;
+    }
+//    else
+       // printf("Simple increment\n");
+//	printf("Result: %s\n",str.c_str());
+	return;
 }
 
 bool is_palin(std::string&s)
@@ -44,13 +50,17 @@ int main()
         scanf("%s", expr);
 	std::string str(expr);
 
-	str=add_one(str,1);
+	increment(str,str.size()-1);
 	while (!is_palin(str)) {
-        //printf("candidate= %s\n",str.c_str());
 	    int str_end=str.size()-1;
-	    for (int i=str_end;i>=str_end/2;--i) {
-            if (str[i] != str[str_end-i])
-                str=add_one(str,abs(str[i]-str[str_end-i])*powl(10,str_end-i));
+	    for (int i=str_end;i>str_end/2;--i) {
+            if (str[i] != str[str_end-i]) {
+                char old=str[i];
+                str[i]=str[str_end-i];
+                if (old>str[i])
+                    increment(str,i-1);
+            }
+ //           printf("candidate= %s i=%d str[i]=%c str[other]=%c str_end=%d str_end/2=%d\n",str.c_str(),i,str[i],str[str_end-i],str_end,str_end/2);
         }
 	}
 
