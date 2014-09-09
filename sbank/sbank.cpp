@@ -3,10 +3,12 @@
 #include <tr1/unordered_map>
 #include <string>
 #include <list>
+#include <map>
 #include <string.h>
 
 typedef std::tr1::unordered_map<std::string, int> un_map;
-std::list<std::string> l;
+//std::list<std::string> l;
+std::map<std::string,int> l;
 un_map m;
 
 #define LOG 0
@@ -31,12 +33,12 @@ int main()
                 printf("Read=%s s=%d\n",acc,s);
 #endif
                 if ((++m[acc]) == 1)
-                    l.push_back(std::string(acc));
+                    l[std::string(acc)]=0;
             }
             free(acc);
         }
-        for (std::list<std::string>::iterator it=l.begin();it!=l.end();++it) {
-            printf("%s %d\n",it->c_str(), m[*it]);
+        for (std::map<std::string,int>::iterator it=l.begin();it!=l.end();++it) {
+            printf("%s %d\n",it->first.c_str(), m[it->first]);
         }
         printf("\n");
         m.clear(); l.clear();
