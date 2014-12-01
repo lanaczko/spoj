@@ -25,7 +25,7 @@ char** graph(int input_size, char** input, int* result_size) {
     int lvl_no=1;
     char friends[max_friends][max_friends];
     char seen[max_friends]; // Friends we've already processed
-    int fr_no=0;
+    char visited[max_friends];
     char q[max_friends];
     int q_c=0;
     
@@ -33,16 +33,21 @@ char** graph(int input_size, char** input, int* result_size) {
         goto output; // I work in kernel :)
     
     bzero(seen, max_friends);
+    bzero(visited, max_friends);
     bzero(q, max_friends);
+    for (int i=0;i<max_friends;++i)
+        *(friends[i])=0;
 
     seen[input[0][0]]=1;
     q[q_c++]=input[0][0];
     // Build the graph
     for (int i=0; i<input_size; ++i) {
-        printf("in%d=%s\n", i, input[i]);
+        printf("in[%d]=%s\n", i, input[i]);
 
         char root=input[i][0];
-        fr_no++;
+        if (*friends[root]) continue;
+        bzero(friends[root],max_friends);
+
         int fr_c=0; // friend counter
         for (int ii=1;ii<strlen(input[i]); ++ii){
             char c = input[i][ii];
@@ -50,28 +55,42 @@ char** graph(int input_size, char** input, int* result_size) {
             if (c==':' || c==',' || c==0) continue;
             friends[root][fr_c++]=c;
         }
-        friends[root][fr_c]=0;
+        //friends[root][fr_c]=0;
         printf("my %c=%s\n",root,friends[root]);
     }
     res=malloc(max_friends*sizeof(char*)); 
     
     while (q_c) {
+        if (q_c>10) goto output;
         char *lvl=malloc(max_friends*sizeof(char));
-        char s=q[q_c-1]; // get the last one
-        
+        char *it=lvl;
+        char s=q[--q_c]; // get the last one
+        printf("processing q_c=%d fr[%c]=%s\n",q_c,s,friends[s]);
+        for (int i=0;i<strlen(friends[s]);++i) {
+            char t=friends[s][i];
+            printf("processing q_c=%d s=%c t=%c\n",q_c,s,t);
+            if (!seen[t]) {
+                *(it++)=t; *(it++)=',';
+                seen[t]=1;
+            }
+            if(!visited[t]) {
+                q[q_c++]=t;
+                visited[t]=1;
+            }
+        }
+        if (it!=lvl) {
+            *(--it)=0;
+            res[res_size++]=lvl;
+        } else {
+            free(lvl);
+        }
+        printf("%s\n", lvl);
     }
     
  output:
     *result_size = res_size;
     return res; // can please somebody free this?
 }
-
-
-
-
-
-
-
 
 int main() {
     //FILE *f = fopen(getenv("OUTPUT_PATH"), "w");
